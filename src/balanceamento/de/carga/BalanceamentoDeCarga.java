@@ -292,6 +292,13 @@ public class BalanceamentoDeCarga {
             JSONObject test = tests.getJSONObject(i);
             Integer id = test.getInt("id");
             System.out.println("Test #" + id);
+            Integer mpsoc_y = test.getInt("mpsoc_y");
+            Integer mpsoc_x = test.getInt("mpsoc_x");
+            Processador processors[][] = new Processador[mpsoc_x][mpsoc_y];
+            JSONArray apps = test.getJSONArray("apps");
+            for(int j = 0; j < apps.length(); j++){
+                JSONObject app = apps.getJSONObject(j);
+            }
         }
     }
     
