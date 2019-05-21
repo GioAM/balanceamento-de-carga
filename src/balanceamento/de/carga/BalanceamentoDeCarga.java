@@ -5,6 +5,8 @@
  */
 package balanceamento.de.carga;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -126,7 +128,7 @@ public class BalanceamentoDeCarga {
         "		]\n" +
         "	},\n" +
         "]";
-    String apps = "[\n" +
+    static String appsJSON = "[\n" +
         "	{\n" +
         "		\"name\": \"App0\",\n" +
         "		\"number_tasks\": 2,\n" +
@@ -194,9 +196,7 @@ public class BalanceamentoDeCarga {
         "						\"communication\": 500,\n" +
         "					},\n" +
         "					{\n" +
-        "						\"id\": 2,\n" +
-        "						\"communication\": 100,\n" +
-        "					},\n" +
+        "				},\n" +
         "				]\n" +
         "			},\n" +
         "			{\n" +
@@ -287,19 +287,66 @@ public class BalanceamentoDeCarga {
         "	},\n" +
         "]";
     public static void main(String[] args) {
+        Queue<JSONObject> taskQueue = new LinkedList<>(); 
         JSONArray tests = new JSONArray(testJSON);
+        JSONArray apps = new JSONArray(appsJSON);
         for(int i = 0; i < tests.length(); i++){
             JSONObject test = tests.getJSONObject(i);
+            JSONArray appsTests = test.getJSONArray("apps");
             Integer id = test.getInt("id");
             System.out.println("Test #" + id);
+            
+            Integer tasks_per_pe = test.getInt("tasks_per_pe");
             Integer mpsoc_y = test.getInt("mpsoc_y");
             Integer mpsoc_x = test.getInt("mpsoc_x");
             Processador processors[][] = new Processador[mpsoc_x][mpsoc_y];
-            JSONArray apps = test.getJSONArray("apps");
-            for(int j = 0; j < apps.length(); j++){
-                JSONObject app = apps.getJSONObject(j);
+            
+            for(int p = 0; p <  mpsoc_x; p++){
+                for(int q = 0; q < mpsoc_y; q++){
+                    processors[p][q] = new Processador();
+                }
+            }
+            
+            processors[0][0].setActivity("GMP");
+            processors[0][0].setEnabled(false);
+            
+            for(int j = 0; j < appsTests.length(); j++){
+                JSONObject appTest = appsTests.getJSONObject(j);
+                String appTask = appTest.getString("app_name");
+                Integer qtdapps = appTest.getInt("qtd_apps");
+                for(int k = 0; k < apps.length(); k++){
+                    JSONObject app = apps.getJSONObject(i);
+                    String appName = app.getString("name");
+                    if(appName.equals(appTask)){
+                        for(int l = 0; l < qtdapps; l++){
+                            JSONArray tasks = app.getJSONArray("tasks");
+                            Integer numberTasks = app.getInt("number_tasks");
+                            for(int m = 0; m < numberTasks; m++){
+                                taskQueue.add(tasks.getJSONObject(i));
+                            }
+                        }
+                    }
+                }
+            }
+            for(int n = 0; n <  mpsoc_x; n++){
+                for(int o = 0; o < mpsoc_y; o++){
+                    if(processors[n][o].isEnabled()){
+                        Integer idTop = taskQueue.element().getInt("id");
+                        processors[n][o].setLoad(taskQueue.peek().getInt("load"));
+                        processors[n][o].setActivity(idTop.toString());
+                        processors[n][o].setProcessors(1);
+                        if(processors[n][o].getProcessors() < tasks_per_pe){
+                             processors[n][o].setEnabled(false);
+                        }
+                        taskQueue.remove();
+                    }
+                }
+            }
+            for(int n = 0; n <  mpsoc_x; n++){
+                for(int o = 0; o < mpsoc_y; o++){
+                    System.out.println("Processors " + "[" + n +"]"+ "[" + o +"] = " + processors[n][o].getActivity());
+                }
             }
         }
-    }
-    
+    } 
 }

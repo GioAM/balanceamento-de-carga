@@ -12,28 +12,32 @@ import java.util.List;
  * @author giovani.meneguel
  */
 public class Processador {
-    private List<String> activity[];
+    private String activity;
     private Integer processors;
+    private Integer load;
     private boolean enabled;
+    
+    public Processador(){
+        activity = "";
+        processors = 0;
+        load = 0;
+        enabled = true;
+    }
 
-    public List<String>[] getActivity() {
+    public String getActivity() {
         return activity;
     }
 
     public void setActivity(String activity) {
-       
+       this.activity = this.activity + " / " + activity;
     }
-    
-    public String getActivityIndex(int index) {
-      return "teste";  
-    }
-    
+
     public Integer getProcessors() {
         return processors;
     }
 
     public void setProcessors(Integer processors) {
-        this.processors = processors;
+        this.processors = this.processors + processors;
     }
 
     public boolean isEnabled() {
@@ -42,5 +46,11 @@ public class Processador {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+    public Integer getLoad() {
+        return load;
+    }
+    public void setLoad(Integer load) {
+        this.load = this.load + load;
     }
 }
